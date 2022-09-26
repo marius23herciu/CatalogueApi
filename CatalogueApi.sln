@@ -5,6 +5,8 @@ VisualStudioVersion = 17.3.32901.215
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CatalogueApi", "CatalogueApi.csproj", "{C3758A56-8374-4656-9014-35FC52D71F83}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "laborator19(Catalog)", "..\laborator19(Catalog)\laborator19(Catalog).csproj", "{51678BBB-D167-4722-B540-D37A6EBF0DC8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{C3758A56-8374-4656-9014-35FC52D71F83}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C3758A56-8374-4656-9014-35FC52D71F83}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C3758A56-8374-4656-9014-35FC52D71F83}.Release|Any CPU.Build.0 = Release|Any CPU
+		{51678BBB-D167-4722-B540-D37A6EBF0DC8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{51678BBB-D167-4722-B540-D37A6EBF0DC8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{51678BBB-D167-4722-B540-D37A6EBF0DC8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{51678BBB-D167-4722-B540-D37A6EBF0DC8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Ex1(Laborator19)\Ex1(Laborator19).csproj" />
+    <ProjectReference Include="..\laborator19(Catalog)\laborator19(Catalog).csproj" />
   </ItemGroup>
 
 </Project>

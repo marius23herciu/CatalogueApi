@@ -1,5 +1,5 @@
 ﻿using CatalogueApi.DTOs;
-using Ex1_Laborator19_.Models;
+using laborator19_Catalog_.Models;
 
 namespace CatalogueApi.Extensions
 {

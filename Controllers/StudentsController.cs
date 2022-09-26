@@ -1,6 +1,6 @@
 ﻿using CatalogueApi.DTOs;
 using CatalogueApi.Extensions;
-using Ex1_Laborator19_.Models;
+using laborator19_Catalog_.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
