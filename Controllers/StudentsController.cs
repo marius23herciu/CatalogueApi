@@ -95,6 +95,32 @@ namespace CatalogueApi.Controllers
 
             ctx.SaveChanges();
         }
+        /// <summary>
+        /// Changes student's data.
+        /// </summary>
+        /// <param name="studentId"></param>
+        /// <param name="studentData"></param>
+        [HttpPut("change-data{studentId}")]
+        public void ChangeStudentData([FromRoute] int studentId, [FromBody] StudentData studentData)
+        {
+            using var ctx = new CatalogueDbContext();
+
+            var student = ctx.Students.Where(s => s.Id == studentId).FirstOrDefault();
+            if (studentData.FirstName!="string")
+            {
+                student.FirstName = studentData.FirstName;
+            }
+            if ( studentData.LastName != "string")
+            {
+                student.LastName = studentData.LastName;
+            }
+            if (studentData.Age>0)
+            {
+                student.Age = studentData.Age;
+            }
+            
+            ctx.SaveChanges();
+        }
         /*• Modificare adresa student
      • In cazul in care studentul nu are adresa, aceasta va fi creeata*/
         /// <summary>
@@ -103,7 +129,7 @@ namespace CatalogueApi.Controllers
         /// <param name="studentId"></param>
         /// <param name="adresse"></param>
         [HttpPut("change-Adresse{studentId}")]
-        public void ChangeStudentAdresse([FromRoute] int studentId, [FromBody] AdresseToCreate adresse)
+        public void ChangeStudentAdresse([FromRoute] int studentId, [FromBody] AddressToCreate adresse)
         {
             using var ctx = new CatalogueDbContext();
 
@@ -111,7 +137,7 @@ namespace CatalogueApi.Controllers
 
             if (student.Adresse == null)
             {
-                student.Adresse = new Adresse
+                student.Adresse = new Address
                 {
                     City = adresse.City,
                     Street = adresse.Street,

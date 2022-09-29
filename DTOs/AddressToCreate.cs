@@ -1,6 +1,6 @@
 ﻿namespace CatalogueApi.DTOs
 {
-    public class AdresseToCreate
+    public class AddressToCreate
     {
         public string City { get; set; }
         public string Street { get; set; }

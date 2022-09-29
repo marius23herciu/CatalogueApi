@@ -5,10 +5,10 @@ namespace CatalogueApi.Extensions
 {
     public static class AdresseExtension
     {
-        public static AdresseToGet ToDto(this Adresse adresse)
+        public static AddressToGet ToDto(this Address adresse)
         {
             return
-                new AdresseToGet
+                new AddressToGet
                 {
                     City = adresse.City,
                     Street = adresse.Street,
