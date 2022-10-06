@@ -1,7 +1,7 @@
-﻿using CatalogueApi.DTOs;
+﻿using CatalogApi.DTOs;
 using laborator19_Catalog_.Models;
 
-namespace CatalogueApi.Extensions
+namespace CatalogApi.Extensions
 {
     public static class StudentExtension
     {
@@ -13,7 +13,7 @@ namespace CatalogueApi.Extensions
                     Id = student.Id,
                     FirstName = student.FirstName,
                     LastName = student.LastName,
-                    Age = student.Age
+                    Age = student.Age,
                 };
         }
     }

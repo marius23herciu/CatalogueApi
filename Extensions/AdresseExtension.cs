@@ -1,7 +1,7 @@
-﻿using CatalogueApi.DTOs;
+﻿using CatalogApi.DTOs;
 using laborator19_Catalog_.Models;
 
-namespace CatalogueApi.Extensions
+namespace CatalogApi.Extensions
 {
     public static class AdresseExtension
     {

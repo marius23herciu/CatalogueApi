@@ -3,19 +3,18 @@ using System.ComponentModel.DataAnnotations;
 
 namespace CatalogApi.DTOs
 {
-    public class StudentToGet
+    public class TeacherToGet
     {
-        [Required(ErrorMessage = "Student Id is required.")]
+        [Required(ErrorMessage = "Teacher Id is required.")]
         [Range(1, int.MaxValue)]
         public int Id { get; set; }
         [Required(ErrorMessage = "First name is required.")]
         public string FirstName { get; set; }
         [Required(ErrorMessage = "Last name is required.")]
         public string LastName { get; set; }
-        [Required(ErrorMessage = "Age is required.")]
-        [Range(1, 150)]
-        public int Age { get; set; }
-        public List<Mark> Marks { get; set; } = new List<Mark>();
-        public List<Subject> Subjects { get; set; } = new List<Subject>();
+        [Required(ErrorMessage = "Rank is required.")]
+        [Range(0, 3)]
+        public Rank Rank { get; set; }
+        public int? SubjectId { get; set; }
     }
 }
