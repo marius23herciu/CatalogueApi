@@ -13,19 +13,24 @@ namespace CatalogApi.Controllers
     public class StudentsController : ControllerBase
     {
 
-    /*• Obtinerea tuturor studentilor*/
+        private readonly CatalogueDbContext ctx;
 
-    /// <summary>
-    /// Returns all students with name and age.
-    /// </summary>
-    /// <returns></returns>
-    [HttpGet("all")]
+        public StudentsController(CatalogueDbContext ctx)
+        {
+            this.ctx = ctx;
+        }
+
+        /*• Obtinerea tuturor studentilor*/
+
+        /// <summary>
+        /// Returns all students with name and age.
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("all")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<StudentToGet>))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
         public IActionResult GetAllStudents()
         {
-            using var ctx = new CatalogueDbContext();
-
             var students = ctx.Students.Include(s=>s.Subjects).Select(s => s.ToDto()).ToList();
 
             if (students.Count == 0)
@@ -48,7 +53,6 @@ namespace CatalogApi.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
         public IActionResult GetStudentById([FromRoute] int id)
         {
-            using var ctx = new CatalogueDbContext();
             var student = ctx.Students.Where(s => s.Id == id).FirstOrDefault();
             if (student == null)
             {
@@ -69,8 +73,6 @@ namespace CatalogApi.Controllers
         [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(StudentToGet))]
         public IActionResult CreateStudent([FromBody] StudentToCreate studentToCreate)
         {
-            using var ctx = new CatalogueDbContext();
-
             var subjects = ctx.Subjects.ToList();
 
             var newStudent = new Student
@@ -98,7 +100,6 @@ namespace CatalogApi.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
         public IActionResult DeleteStudent([FromBody] int studentId)
         {
-            using var ctx = new CatalogueDbContext();
             var studentToRemove = ctx.Students.Include(a => a.Adresse).Where(s => s.Id == studentId).FirstOrDefault();
 
             if (studentToRemove == null)
@@ -125,8 +126,6 @@ namespace CatalogApi.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
         public IActionResult ChangeStudentData([FromRoute] int studentId, [FromBody] StudentData studentData)
         {
-            using var ctx = new CatalogueDbContext();
-
             var student = ctx.Students.Where(s => s.Id == studentId).FirstOrDefault();
 
             if (student == null)
@@ -164,8 +163,6 @@ namespace CatalogApi.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
         public IActionResult ChangeStudentAdresse([FromRoute] int studentId, [FromBody] AddressToCreate adresse)
         {
-            using var ctx = new CatalogueDbContext();
-
             var student = ctx.Students.Include(s => s.Adresse).Where(s => s.Id == studentId).FirstOrDefault();
 
             if (student == null)
@@ -209,7 +206,6 @@ stearsa*/
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
         public IActionResult DeleteStudentAndAdresse([FromBody] int studentId, [FromQuery] bool deleteAddress)
         {
-            using var ctx = new CatalogueDbContext();
             var studentToRemove = ctx.Students.Include(a => a.Adresse).Where(s => s.Id == studentId).FirstOrDefault();
 
             if (studentToRemove == null)

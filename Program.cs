@@ -1,3 +1,4 @@
+using laborator19_Catalog_.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System.Reflection;
 
@@ -9,6 +10,8 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(o =>AddSwaggerDocumentation(o));
+
+builder.Services.AddScoped<CatalogueDbContext>();
 
 var app = builder.Build();
 

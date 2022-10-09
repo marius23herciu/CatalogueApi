@@ -13,7 +13,12 @@ namespace CatalogApi.Controllers
     [ApiController]
     public class CatalogController : ControllerBase
     {
-       
+        private readonly CatalogueDbContext ctx;
+
+        public CatalogController(CatalogueDbContext ctx)
+        {
+            this.ctx = ctx;
+        }
 
 
         /* • Adaugarea unui curs*/
@@ -27,8 +32,6 @@ namespace CatalogApi.Controllers
         [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(SubjectToGet))]
         public IActionResult AddSubject([FromBody] SubjectToCreate subjectToCreate)
         {
-            using var ctx = new CatalogueDbContext();
-
             var newSubject = new Subject
             {
                 Name = subjectToCreate.Name,
@@ -57,8 +60,6 @@ namespace CatalogApi.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
         public IActionResult AddMarkToStudent([FromBody] MarkToCreate markToCreate)
         {
-            using var ctx = new CatalogueDbContext();
-
             var student = ctx.Students.Where(s => s.Id == markToCreate.StudentId).FirstOrDefault();
 
             if (student == null)
@@ -96,8 +97,6 @@ namespace CatalogApi.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
         public IActionResult GetAllMarks([FromRoute] int id)
         {
-            using var ctx = new CatalogueDbContext();
-
             var student = ctx.Students.Include(m => m.Marks).Where(s => s.Id == id).FirstOrDefault();
             if (student == null)
             {
@@ -134,8 +133,6 @@ namespace CatalogApi.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
         public IActionResult GetAllMarksForSpecificSubject([FromRoute] int studentId, [FromRoute] int subjectId)
         {
-            using var ctx = new CatalogueDbContext();
-
             var student = ctx.Students.Include(m => m.Marks).Where(s => s.Id == studentId).FirstOrDefault();
             if (student == null)
             {
@@ -177,8 +174,6 @@ namespace CatalogApi.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
         public IActionResult GetAllAveragesForOneStudent([FromRoute] int studentId)
         {
-            using var ctx = new CatalogueDbContext();
-
             var student = ctx.Students.Include(s=>s.Subjects).Include(m => m.Marks).Where(s => s.Id == studentId).FirstOrDefault();
             if (student == null)
             {
@@ -237,8 +232,6 @@ namespace CatalogApi.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
         public IActionResult GetAllAveragesInOrder([FromQuery] bool ascendingOrder)
         {
-            using var ctx = new CatalogueDbContext();
-
             var students = ctx.Students.Include(s => s.Subjects).Include(m => m.Marks).ToList();
             if (students == null)
             {

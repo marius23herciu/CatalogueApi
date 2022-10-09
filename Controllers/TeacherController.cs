@@ -13,7 +13,13 @@ namespace CatalogApi.Controllers
     [ApiController]
     public class TeacherController : ControllerBase
     {
-        
+        private readonly CatalogueDbContext ctx;
+
+        public TeacherController(CatalogueDbContext ctx)
+        {
+            this.ctx = ctx;
+        }
+
         /* Stergerea unui curs
               • Ce alte stergeri implica?*/
 
@@ -28,8 +34,6 @@ namespace CatalogApi.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
         public IActionResult DeleteSubject([FromBody] int subjectId, [FromQuery] bool keepMarks)
         {
-            using var ctx = new CatalogueDbContext();
-
             var subjectToDelete = ctx.Subjects.Include(m=>m.Marks).Include(t => t.Teacher).Where(s => s.Id == subjectId).FirstOrDefault();
             if (subjectToDelete == null)
             {
@@ -60,8 +64,6 @@ namespace CatalogApi.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
         public IActionResult CreateTeacher([FromBody] TeacherToCreate teacherToCreate)
         {
-            using var ctx = new CatalogueDbContext();
-
             var newTeacher = new Teacher
             {
                 FirstName = teacherToCreate.FirstName,
@@ -88,8 +90,6 @@ namespace CatalogApi.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
         public IActionResult DeleteTeacher([FromBody] int teacherId)
         {
-            using var ctx = new CatalogueDbContext();
-
             var teacherToDelete = ctx.Teachers.Include(a=>a.Address).Where(s => s.Id == teacherId).FirstOrDefault();
 
             if (teacherToDelete == null)
@@ -122,8 +122,6 @@ namespace CatalogApi.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
         public IActionResult ChangeTeachersAddress([FromRoute] int teacherId, [FromBody] AddressToCreate address)
         {
-            using var ctx = new CatalogueDbContext();
-
             var teacher = ctx.Teachers.Include(s => s.Address).Where(t => t.Id == teacherId).FirstOrDefault();
 
             if (teacher == null)
@@ -168,8 +166,6 @@ namespace CatalogApi.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
         public IActionResult GivesCourseToTeacher([FromRoute] int teacherId, [FromBody] int subjectId)
         {
-            using var ctx = new CatalogueDbContext();
-
             var teacher = ctx.Teachers.Where(t => t.Id == teacherId).Include(s => s.Subject).FirstOrDefault();
 
             if (teacher == null)
@@ -209,8 +205,6 @@ namespace CatalogApi.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
         public IActionResult PromoteTeacher([FromRoute] int teacherId )
         {
-            using var ctx = new CatalogueDbContext();
-
             var teacher = ctx.Teachers.Where(t => t.Id == teacherId).FirstOrDefault();
 
             if (teacher == null)
@@ -242,8 +236,6 @@ namespace CatalogApi.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
         public IActionResult GetAllMarks([FromRoute] int teacherId)
         {
-            using var ctx = new CatalogueDbContext();
-
             var teacher = ctx.Teachers.Include(m => m.Subject).Where(s => s.Id == teacherId).FirstOrDefault();
             if (teacher == null)
             {
