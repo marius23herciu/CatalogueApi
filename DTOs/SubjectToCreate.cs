@@ -1,4 +1,4 @@
-﻿using laborator19_Catalog_.Models;
+﻿
 using System.ComponentModel.DataAnnotations;
 
 namespace CatalogApi.DTOs

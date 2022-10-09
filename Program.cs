@@ -1,3 +1,5 @@
+
+using laborator19_Catalog_;
 using laborator19_Catalog_.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System.Reflection;
@@ -12,6 +14,8 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(o =>AddSwaggerDocumentation(o));
 
 builder.Services.AddScoped<CatalogueDbContext>();
+builder.Services.AddScoped<DataLayer>();
+//data layer daca faci la fel ca ce e sus
 
 var app = builder.Build();
 
