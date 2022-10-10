@@ -16,7 +16,7 @@ namespace CatalogApi.DTOs
         [Required(ErrorMessage = "Age is required.")]
         [Range(1, 150)]
         public int Age { get; set; }
-        public List<Mark> Marks { get; set; } = new List<Mark>();
-        public List<Subject> Subjects { get; set; } = new List<Subject>();
+        //public List<Mark> Marks { get; set; } = new List<Mark>();
+        //public List<Subject> Subjects { get; set; } = new List<Subject>();
     }
 }

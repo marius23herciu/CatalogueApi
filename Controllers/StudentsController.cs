@@ -1,5 +1,6 @@
 ﻿using CatalogApi.DTOs;
 using CatalogApi.Extensions;
+using laborator19_Catalog_;
 using laborator19_Catalog_.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -12,12 +13,13 @@ namespace CatalogApi.Controllers
     [ApiController]
     public class StudentsController : ControllerBase
     {
-
+        private readonly DataLayer dataLayer;
         private readonly CatalogueDbContext ctx;
 
-        public StudentsController(CatalogueDbContext ctx)
+        public StudentsController(CatalogueDbContext ctx, DataLayer dataLayer)
         {
             this.ctx = ctx;
+            this.dataLayer = dataLayer;
         }
 
         /*• Obtinerea tuturor studentilor*/
@@ -31,13 +33,7 @@ namespace CatalogApi.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
         public IActionResult GetAllStudents()
         {
-            var students = ctx.Students.Include(s=>s.Subjects).Select(s => s.ToDto()).ToList();
-
-            if (students.Count == 0)
-            {
-                return NotFound("Catalog is empty.");
-            }
-
+            var students = dataLayer.GetAllStudents().Select(s => s.ToDto());
             return Ok(students);
         }
 
@@ -53,12 +49,7 @@ namespace CatalogApi.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
         public IActionResult GetStudentById([FromRoute] int id)
         {
-            var student = ctx.Students.Where(s => s.Id == id).FirstOrDefault();
-            if (student == null)
-            {
-                return NotFound("Student does not exist.");
-            }
-
+            var student = dataLayer.GetStudentById(id);
             return Ok(student.ToDto());
         }
 
@@ -73,19 +64,7 @@ namespace CatalogApi.Controllers
         [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(StudentToGet))]
         public IActionResult CreateStudent([FromBody] StudentToCreate studentToCreate)
         {
-            var subjects = ctx.Subjects.ToList();
-
-            var newStudent = new Student
-            {
-                FirstName = studentToCreate.FirstName,
-                LastName = studentToCreate.LastName,
-                Age = studentToCreate.Age,
-                Subjects=subjects,
-            };
-
-            ctx.Add(newStudent);
-            ctx.SaveChanges();
-
+            var newStudent = dataLayer.CreateStudent(studentToCreate.FirstName, studentToCreate.LastName, studentToCreate.Age);
             return Created("New Student Created.", newStudent.ToDto());
         }
 
@@ -107,9 +86,7 @@ namespace CatalogApi.Controllers
                 return NotFound("Student does not exist.");
             }
 
-            studentToRemove.Adresse = null;
-            ctx.Students.Remove(studentToRemove);
-            ctx.SaveChanges();
+            dataLayer.DeleteStudent(studentId);
 
             return Ok($"Student with id {studentId} was deleted.");
         }
@@ -132,20 +109,8 @@ namespace CatalogApi.Controllers
             {
                 return NotFound($"Student with Id {studentId} does not exist.");
             }
-            if (studentData.FirstName != string.Empty)
-            {
-                student.FirstName = studentData.FirstName;
-            }
-            if (studentData.LastName != string.Empty)
-            {
-                student.LastName = studentData.LastName;
-            }
-            if (studentData.Age != null)
-            {
-                student.Age = studentData.Age;
-            }
 
-            ctx.SaveChanges();
+            dataLayer.ChangeStudentData(studentId, studentData.FirstName, studentData.LastName, studentData.Age);
 
             return Ok($"Data for the student with Id {studentId} has been changed.");
         }
@@ -157,11 +122,11 @@ namespace CatalogApi.Controllers
         /// Adds or changes student address.
         /// </summary>
         /// <param name="studentId"></param>
-        /// <param name="adresse"></param>
+        /// <param name="address"></param>
         [HttpPut("change-Adresse{studentId}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
-        public IActionResult ChangeStudentAdresse([FromRoute] int studentId, [FromBody] AddressToCreate adresse)
+        public IActionResult ChangeStudentAddress([FromRoute] int studentId, [FromBody] AddressToCreate address)
         {
             var student = ctx.Students.Include(s => s.Adresse).Where(s => s.Id == studentId).FirstOrDefault();
 
@@ -170,24 +135,7 @@ namespace CatalogApi.Controllers
                 return NotFound($"Student with Id {studentId} does not exist.");
             }
 
-            if (student.Adresse == null)
-            {
-                student.Adresse = new Address
-                {
-                    City = adresse.City,
-                    Street = adresse.Street,
-                    Number = adresse.Number,
-                };
-            }
-            else
-            {
-                var adresseToChange = student.Adresse;
-                adresseToChange.City = adresse.City;
-                adresseToChange.Street = adresse.Street;
-                adresseToChange.Number = adresse.Number;
-            }
-
-            ctx.SaveChanges();
+            dataLayer.ChangeStudentAddress(studentId, address.City, address.Street, address.Number);
 
             return Ok("Student's address changed.");
         }
@@ -204,7 +152,7 @@ stearsa*/
         [HttpDelete("delete")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
-        public IActionResult DeleteStudentAndAdresse([FromBody] int studentId, [FromQuery] bool deleteAddress)
+        public IActionResult DeleteStudentAndAddress([FromBody] int studentId, [FromQuery] bool deleteAddress)
         {
             var studentToRemove = ctx.Students.Include(a => a.Adresse).Where(s => s.Id == studentId).FirstOrDefault();
 
@@ -213,21 +161,7 @@ stearsa*/
                 return NotFound($"Student with Id {studentId} does not exist.");
             }
 
-            if (studentToRemove != null)
-            {
-                if (deleteAddress == true)
-                {
-                    var adresseToRemove = ctx.Adresses.Where(s => s.StudentId == studentId).FirstOrDefault();
-                    ctx.Adresses.Remove(adresseToRemove);
-                    ctx.Students.Remove(studentToRemove);
-                }
-                else
-                {
-                    ctx.Students.Remove(studentToRemove);
-                }
-            }
-
-            ctx.SaveChanges();
+            dataLayer.DeleteStudentAndAddress(studentId, deleteAddress);
 
             if (deleteAddress == false)
             {
