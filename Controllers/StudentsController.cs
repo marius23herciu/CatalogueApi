@@ -147,8 +147,8 @@ stearsa*/
         /// <summary>
         /// Deletes stundent with or without address.
         /// </summary>
-        /// <param name="studentId"></param>
-        /// <param name="deleteAddress"></param>
+        /// <param name="studentId">Id of student to remove</param>
+        /// <param name="deleteAddress">If true, deletes student with his address.</param>
         [HttpDelete("delete")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]

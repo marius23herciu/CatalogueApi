@@ -175,6 +175,56 @@ namespace CatalogApi.Controllers
 
             return Ok(orderedAverages);
         }
+        /*
+         Obtinerea tuturor notelor acordate de catre un
+         teacher:
+               • Va returna o lista ce va contine DTO-uri continand
+               valoarea notei, data acordarii precum si id-ul
+               studentului
+         */
+        /// <summary>
+        /// Returns a list of all marks given by a teacher.
+        /// </summary>
+        /// <param name="teacherId"></param>
+        /// <returns></returns>
+        [HttpGet("all-marks-from-{teacherId}")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<MarkToGet>))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
+        public IActionResult GetAllMarksGivenByTeacher([FromRoute] int teacherId)
+        {
+            var teacher = ctx.Teachers.Include(m => m.Subject).Where(s => s.Id == teacherId).FirstOrDefault();
+            if (teacher == null)
+            {
+                return NotFound($"Teacher does not exist.");
+            }
 
+            var marks = dataLayer.GetAllMarksGivenByTeacher(teacherId);
+
+            return Ok(marks);
+        }
+        /* Stergerea unui curs
+             • Ce alte stergeri implica?*/
+
+        /// <summary>
+        /// Deletes a selected subjects. The teacher remains with NULL to SubjectId.
+        /// </summary>
+        /// <param name="subjectId"></param>
+        /// <param name="keepMarks">If true, all marks from the deleted subject remain with NULL to SubjectId.</param>
+        /// <returns></returns>
+        [HttpDelete("delete-subject{subjectId}")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
+        public IActionResult DeleteSubject([FromBody] int subjectId, [FromQuery] bool keepMarks)
+        {
+            var subjectToDelete = ctx.Subjects.Include(m => m.Marks).Include(t => t.Teacher).Where(s => s.Id == subjectId).FirstOrDefault();
+            if (subjectToDelete == null)
+            {
+                return NotFound("Subject not found.");
+            }
+
+            dataLayer.DeleteSubject(subjectId, keepMarks);
+
+            return Ok($"Subject with id {subjectId} was deleted.");
+        }
     }
 }

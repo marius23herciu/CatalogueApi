@@ -1,5 +1,6 @@
 ﻿using CatalogApi.DTOs;
 using CatalogApi.Extensions;
+using laborator19_Catalog_;
 using laborator19_Catalog_.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -14,42 +15,11 @@ namespace CatalogApi.Controllers
     public class TeacherController : ControllerBase
     {
         private readonly CatalogueDbContext ctx;
-
-        public TeacherController(CatalogueDbContext ctx)
+        private readonly DataLayer dataLayer;
+        public TeacherController(CatalogueDbContext ctx, DataLayer dataLayer)
         {
             this.ctx = ctx;
-        }
-
-        /* Stergerea unui curs
-              • Ce alte stergeri implica?*/
-
-        /// <summary>
-        /// Deletes a selected subjects. The teacher remains with NULL to SubjectId.
-        /// </summary>
-        /// <param name="subjectId"></param>
-        /// <param name="keepMarks">If true, all marks from the deleted subject remain with NULL to SubjectId.</param>
-        /// <returns></returns>
-        [HttpDelete("delete-subject{subjectId}")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(string))]
-        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
-        public IActionResult DeleteSubject([FromBody] int subjectId, [FromQuery] bool keepMarks)
-        {
-            var subjectToDelete = ctx.Subjects.Include(m=>m.Marks).Include(t => t.Teacher).Where(s => s.Id == subjectId).FirstOrDefault();
-            if (subjectToDelete == null)
-            {
-                return NotFound("Subject not found.");
-            }
-
-            if (keepMarks!=true)
-            {
-                var marks = ctx.Marks.Where(m => m.SubjectId == subjectId).ToList();
-                ctx.Marks.RemoveRange(marks);
-            }
-            
-            ctx.Subjects.Remove(subjectToDelete);
-            ctx.SaveChanges();
-
-            return Ok($"Subject with id {subjectId} was deleted.");
+            this.dataLayer = dataLayer;
         }
 
         /*• Adaugarea unui teacher*/
@@ -61,18 +31,9 @@ namespace CatalogApi.Controllers
         /// <returns></returns>
         [HttpPost("create")]
         [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(TeacherToGet))]
-        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
         public IActionResult CreateTeacher([FromBody] TeacherToCreate teacherToCreate)
         {
-            var newTeacher = new Teacher
-            {
-                FirstName = teacherToCreate.FirstName,
-                LastName = teacherToCreate.LastName,
-                Rank = teacherToCreate.Rank,
-            };
-
-            ctx.Add(newTeacher);
-            ctx.SaveChanges();
+            var newTeacher = dataLayer.CreateTeacher(teacherToCreate.FirstName, teacherToCreate.LastName, teacherToCreate.Rank);
 
             return Created("New Student Created.", newTeacher.ToDto());
         }
@@ -97,14 +58,7 @@ namespace CatalogApi.Controllers
                 return NotFound("Teacher not found.");
             }
 
-            var addressToRemove = ctx.Adresses.Where(t => t.TeacherId== teacherId).FirstOrDefault();
-            if (addressToRemove!=null)
-            {
-                ctx.Adresses.Remove(addressToRemove);
-            }
-            teacherToDelete.Subject = null;
-            ctx.Teachers.Remove(teacherToDelete);
-            ctx.SaveChanges();
+            dataLayer.DeleteTeacher(teacherId);
 
             return Ok($"Teacher with id {teacherId} was deleted.");
         }
@@ -129,24 +83,7 @@ namespace CatalogApi.Controllers
                 return NotFound($"Teacher with Id {teacherId} does not exist.");
             }
 
-            if (teacher.Address == null)
-            {
-                teacher.Address = new Address
-                {
-                    City = address.City,
-                    Street = address.Street,
-                    Number = address.Number,
-                };
-            }
-            else
-            {
-                var addressToChange = teacher.Address;
-                addressToChange.City = address.City;
-                addressToChange.Street = address.Street;
-                addressToChange.Number = address.Number;
-            }
-
-            ctx.SaveChanges();
+            dataLayer.ChangeTeachersAddress(teacherId, address.City, address.Street, address.Number);
 
             return Ok("Teacher's address changed.");
         }
@@ -176,18 +113,24 @@ namespace CatalogApi.Controllers
             {
                 return BadRequest($"Teacher with Id {teacherId} is appointed to another subject.");
             }
+            foreach (var teacherInList in ctx.Teachers.Include(s=>s.Subject))
+            {
+                if (teacherInList.SubjectId==subjectId)
+                {
+                    return BadRequest($"Subjet is appointed to another teacher.");
+                }
+            }
+
             var subjects = ctx.Subjects.Select(s => s.Id).ToList();
             if (!subjects.Contains(subjectId))
             {
                 return NotFound($"Subject with Id {subjectId} does not exist.");
             }
-            var subject= ctx.Subjects.Where(s=>s.Id==subjectId).FirstOrDefault();
-            teacher.Subject= subject;
-            ctx.SaveChanges();
+            
+            dataLayer.GivesCourseToTeacher(teacherId,subjectId);
 
             return Ok($"Subject with Id {subjectId} has been asigned to teacher with Id {teacherId}.");
         }
-
 
         /* Promovarea teacher-ului
                 • Instructor devine assistant professor
@@ -217,55 +160,11 @@ namespace CatalogApi.Controllers
                 return BadRequest("Teacher allready has the highest rank.");
             }
 
-            teacher.Rank++;
-            ctx.SaveChanges();
+            dataLayer.PromoteTeacher(teacherId);
 
             return Ok("Teacher has been promoted.");
         }
 
-        /*
-         Obtinerea tuturor notelor acordate de catre un
-         teacher:
-               • Va returna o lista ce va contine DTO-uri continand
-               valoarea notei, data acordarii precum si id-ul
-               studentului
-         */
-
-        [HttpGet("all-marks-from-{teacherId}")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<MarkToGet>))]
-        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(string))]
-        public IActionResult GetAllMarks([FromRoute] int teacherId)
-        {
-            var teacher = ctx.Teachers.Include(m => m.Subject).Where(s => s.Id == teacherId).FirstOrDefault();
-            if (teacher == null)
-            {
-                return NotFound($"Teacher does not exist.");
-            }
-
-            var marks = ctx.Marks.Where(m => m.SubjectId == teacher.SubjectId).ToList();
-            
-            if (marks.Count == 0)
-            {
-                return NotFound($"{teacher.ToDto().FirstName} {teacher.ToDto().LastName} has given no marks.");
-            }
-
-            List<MarkToGet> marksList = new List<MarkToGet>();
-            foreach (var mark in marks)
-            {
-                marksList.Add(
-                    new MarkToGet
-                    {
-                        Id= mark.Id,
-                        Value = mark.Value,
-                        SubjectId= mark.SubjectId,
-                        DateTime = mark.DateTime,
-                        StudentId = mark.StudentId,
-                    });
-            }
-
-
-            return Ok(marksList);
-        }
-
+        
     }
 }
